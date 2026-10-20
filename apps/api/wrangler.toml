@@ -1,0 +1,231 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "pejuangyen-api"
+main = "src/index.ts"
+compatibility_date = "2025-05-19"
+compatibility_flags = ["nodejs_compat"]
+
+# ─── D1 Database ─────────────────────────────────────────────────────────────
+# GANTI database_id setelah `wrangler d1 create pejuangyen-db`
+[[d1_databases]]
+binding = "DB"
+database_name = "pejuangyen-db"
+database_id = "698b99c2-0de5-41de-8998-3d520042a9da"
+migrations_dir = "src/db/migrations"
+
+# GANTI database_id setelah `wrangler d1 create pejuangyen-email`
+[[d1_databases]]
+binding = "MAIL_DB"
+database_name = "pejuangyen-email"
+database_id = "33717ac0-c94c-4d30-a143-6a358d7a1a15"
+
+# ─── R2 Bucket (AKTIF) ───────────────────────────────────────────────────────
+# Public URL bucket: https://pub-d56d873c4b8d4204b35361d7bea0dca8.r2.dev
+# (ganti ke file.pejuangyen.com setelah custom domain bucket dipasang)
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "pejuangyen"
+
+[[r2_buckets]]
+binding = "R2_PRIVATE"
+bucket_name = "pejuangyen-private"
+
+# ─── KV Namespace (cache) ────────────────────────────────────────────────────
+# GANTI id setelah `wrangler kv namespace create KV`
+[[kv_namespaces]]
+binding = "KV"
+id = "35bf6ea996394ca18922976bac2a44f4"
+
+# ─── Queues ──────────────────────────────────────────────────────────────────
+# AKTIF (akun sudah Workers Paid). Konfigurasi queue produksi ada di blok
+# [[env.production.queues.*]] di bawah. Queue yang dibuat: notifications,
+# email-sequences, automation-runs + dlq-* (via `wrangler queues create`).
+#   - email-sequences (marketing drip) & automation-runs → JALAN
+#   - email transaksional (verifikasi/reset) tetap dikirim langsung
+
+# ─── Workers AI ──────────────────────────────────────────────────────────────
+[ai]
+binding = "AI"
+
+# ─── Rate Limiting (no KV cost — Cloudflare platform-level) ─────────────────
+[[unsafe.bindings]]
+name = "RL_5_PER_MIN"
+type = "ratelimit"
+namespace_id = "1001"
+simple = { limit = 5, period = 60 }
+
+[[unsafe.bindings]]
+name = "RL_3_PER_HOUR"
+type = "ratelimit"
+namespace_id = "1002"
+simple = { limit = 3, period = 60 }
+
+[[unsafe.bindings]]
+name = "RL_10_PER_HOUR"
+type = "ratelimit"
+namespace_id = "1003"
+simple = { limit = 10, period = 60 }
+
+[[unsafe.bindings]]
+name = "RL_60_PER_MIN"
+type = "ratelimit"
+namespace_id = "1004"
+simple = { limit = 60, period = 60 }
+
+# ─── Cron Triggers (tersedia di Free plan) ──────────────────────────────────
+[triggers]
+crons = ["0 0 * * *", "10 0 * * *", "*/10 * * * *"]
+
+# ─── Development vars (non-secret) ───────────────────────────────────────────
+[vars]
+APP_ENV = "development"
+APP_URL = "http://localhost:5173"
+API_URL = "http://localhost:8787"
+CORS_ORIGIN = "http://localhost:5173"
+COOKIE_DOMAIN = "localhost"
+SUMOPOD_BASE_URL = "https://ai.sumopod.com"
+SUMOPOD_MODEL = "gemini/gemini-2.5-flash-lite"
+SUMOPOD_CONTEXT_LENGTH = "1048576"
+SUMOPOD_MAX_COMPLETION_TOKENS = "65536"
+SUMOPOD_DEEP_MODEL = "deepseek-v4-flash"
+SUMOPOD_DEEP_CONTEXT_LENGTH = "1000000"
+SUMOPOD_DEEP_MAX_COMPLETION_TOKENS = "32768"
+SUMOPOD_FALLBACK_MODEL = "deepseek-v4-flash"
+SUMOPOD_FALLBACK_CONTEXT_LENGTH = "1000000"
+SUMOPOD_FALLBACK_MAX_COMPLETION_TOKENS = "32768"
+PAKASIR_PROJECT_SLUG = "pejuangyen"
+PAKASIR_MODE = "production"
+VAPID_PUBLIC_KEY = "BOtRJq6N91SAYB-2bfZeksF4WjZ2Zb3zYu17OqfopwzQq6NslhZArfLXNisc3g5EzCPF7Si_MF6GFZrGO467Xso"
+VAPID_SUBJECT = "mailto:hallopejuangyen@gmail.com"
+
+# ─── Production environment ──────────────────────────────────────────────────
+[env.production]
+name = "pejuangyen-api"
+
+# Custom domain → api.pejuangyen.com (auto-creates DNS record + cert di zone Cloudflare)
+[[env.production.routes]]
+pattern = "api.pejuangyen.com"
+custom_domain = true
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "pejuangyen-db"
+database_id = "698b99c2-0de5-41de-8998-3d520042a9da"
+migrations_dir = "src/db/migrations"
+
+[[env.production.d1_databases]]
+binding = "MAIL_DB"
+database_name = "pejuangyen-email"
+database_id = "33717ac0-c94c-4d30-a143-6a358d7a1a15"
+
+[[env.production.r2_buckets]]
+binding = "R2"
+bucket_name = "pejuangyen"
+
+[[env.production.r2_buckets]]
+binding = "R2_PRIVATE"
+bucket_name = "pejuangyen-private"
+
+[[env.production.kv_namespaces]]
+binding = "KV"
+id = "35bf6ea996394ca18922976bac2a44f4"
+
+# ─── Queues (Workers Paid — AKTIF) ───────────────────────────────────────────
+# Akun sudah upgrade ke Workers Paid → email-sequences (drip) & automation-runs aktif.
+[[env.production.queues.producers]]
+queue = "notifications"
+binding = "NOTIFICATIONS_QUEUE"
+
+[[env.production.queues.consumers]]
+queue = "notifications"
+max_batch_size = 10
+max_batch_timeout = 5
+dead_letter_queue = "dlq-notifications"
+
+[[env.production.queues.producers]]
+queue = "email-sequences"
+binding = "EMAIL_SEQUENCE_QUEUE"
+
+[[env.production.queues.consumers]]
+queue = "email-sequences"
+max_batch_size = 20
+max_batch_timeout = 10
+dead_letter_queue = "dlq-email-sequences"
+
+[[env.production.queues.producers]]
+queue = "automation-runs"
+binding = "AUTOMATION_QUEUE"
+
+[[env.production.queues.consumers]]
+queue = "automation-runs"
+max_batch_size = 5
+max_batch_timeout = 10
+dead_letter_queue = "dlq-automation-runs"
+
+[[env.production.queues.consumers]]
+queue = "dlq-notifications"
+max_batch_size = 10
+max_batch_timeout = 5
+
+[[env.production.queues.consumers]]
+queue = "dlq-email-sequences"
+max_batch_size = 10
+max_batch_timeout = 5
+
+[[env.production.queues.consumers]]
+queue = "dlq-automation-runs"
+max_batch_size = 5
+max_batch_timeout = 10
+
+[env.production.ai]
+binding = "AI"
+
+[[env.production.unsafe.bindings]]
+name = "RL_5_PER_MIN"
+type = "ratelimit"
+namespace_id = "1001"
+simple = { limit = 5, period = 60 }
+
+[[env.production.unsafe.bindings]]
+name = "RL_3_PER_HOUR"
+type = "ratelimit"
+namespace_id = "1002"
+simple = { limit = 3, period = 3600 }
+
+[[env.production.unsafe.bindings]]
+name = "RL_10_PER_HOUR"
+type = "ratelimit"
+namespace_id = "1003"
+simple = { limit = 10, period = 3600 }
+
+[[env.production.unsafe.bindings]]
+name = "RL_60_PER_MIN"
+type = "ratelimit"
+namespace_id = "1004"
+simple = { limit = 60, period = 60 }
+
+[env.production.vars]
+APP_ENV = "production"
+# SEMENTARA: lewati verifikasi email OTP (Mailketing belum dipasang).
+# Register auto-verified + auto-login; login tak menuntut verifikasi.
+# Hapus baris ini (lalu redeploy) setelah Mailketing aktif untuk mengaktifkan OTP lagi.
+DISABLE_EMAIL_VERIFICATION = "true"
+APP_URL = "https://app.pejuangyen.com"
+API_URL = "https://api.pejuangyen.com"
+CORS_ORIGIN = "https://app.pejuangyen.com,https://pejuangyen.com,https://www.pejuangyen.com"
+LANDING_URL = "https://pejuangyen.com"
+COOKIE_DOMAIN = "host-only"
+SUMOPOD_BASE_URL = "https://ai.sumopod.com"
+SUMOPOD_MODEL = "gemini/gemini-2.5-flash-lite"
+SUMOPOD_CONTEXT_LENGTH = "1048576"
+SUMOPOD_MAX_COMPLETION_TOKENS = "65536"
+SUMOPOD_DEEP_MODEL = "deepseek-v4-flash"
+SUMOPOD_DEEP_CONTEXT_LENGTH = "1000000"
+SUMOPOD_DEEP_MAX_COMPLETION_TOKENS = "32768"
+SUMOPOD_FALLBACK_MODEL = "deepseek-v4-flash"
+SUMOPOD_FALLBACK_CONTEXT_LENGTH = "1000000"
+SUMOPOD_FALLBACK_MAX_COMPLETION_TOKENS = "32768"
+# TURNSTILE_SECRET_KEY di-set sebagai Cloudflare secret (wrangler secret put --env production), bukan plaintext.
+PAKASIR_PROJECT_SLUG = "pejuangyen"
+PAKASIR_MODE = "production"
+VAPID_PUBLIC_KEY = "BOtRJq6N91SAYB-2bfZeksF4WjZ2Zb3zYu17OqfopwzQq6NslhZArfLXNisc3g5EzCPF7Si_MF6GFZrGO467Xso"
+VAPID_SUBJECT = "mailto:hallopejuangyen@gmail.com"

@@ -1,0 +1,56 @@
+{
+  "name": "PejuangYen — Belajar & Komunitas",
+  "short_name": "PejuangYen",
+  "description": "Platform belajar & membership untuk PejuangYen. Belajar, naik kelas, dan raih komisi affiliate.",
+  "id": "/",
+  "start_url": "/dashboard?utm_source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#F7F7F8",
+  "theme_color": "#8B1414",
+  "lang": "id",
+  "dir": "ltr",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "url": "/dashboard?utm_source=pwa_shortcut",
+      "description": "Buka dashboard belajar"
+    },
+    {
+      "name": "Leaderboard",
+      "short_name": "Leaderboard",
+      "url": "/growth-ambassador?utm_source=pwa_shortcut",
+      "description": "Lihat peringkat & challenge"
+    },
+    {
+      "name": "Kelas Saya",
+      "short_name": "Kelas",
+      "url": "/my-classes?utm_source=pwa_shortcut",
+      "description": "Lanjutkan belajar"
+    }
+  ]
+}

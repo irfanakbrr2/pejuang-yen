@@ -1,0 +1,6 @@
+name = "pejuangyen-mcp-analytics"
+main = "src/index.ts"
+compatibility_date = "2025-05-19"
+
+[vars]
+ANALYTICS_BASE = "https://api.pejuangyen.com"

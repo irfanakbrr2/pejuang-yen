@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+out/
+dist/
+.turbo/
+.vercel/
+
+# Cloudflare
+.wrangler/
+
+# Secrets & env
+.dev.vars
+.env
+.env.*
+!.env.example
+
+# Misc
+.DS_Store
+*.log
+.agents/

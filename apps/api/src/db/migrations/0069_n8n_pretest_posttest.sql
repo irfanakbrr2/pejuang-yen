@@ -1,0 +1,598 @@
+-- Pejuang Yen — Pre-Test & Post-Test untuk kelas "Automation N8N for Everyone"
+-- Mengikuti pola course sempurna ai-for-solo-preneur: pretest di awal, post-test di akhir.
+-- Kuis identik (10 soal N8N, sesuai panduan-quiz.md) — pretest & post-test memang sama.
+-- Dibuat dengan generator content-templates/html-to-lesson-sql.mjs dari template-quiz.html.
+-- Urutan akhir kurikulum: Pre-Test(0) -> Video1(1) -> Video2(2) -> Coming Soon(3) -> Post-Test(4).
+-- INSERT OR IGNORE => idempoten, aman dijalankan ulang.
+
+-- Lesson "Pre-Test N8N" (quiz) untuk course course-n8n-automation
+INSERT OR IGNORE INTO lessons
+  (id, course_id, module_id, title, slug, lesson_type, content_embed, content_format, description, is_preview, sort_order, status, created_at, updated_at)
+VALUES
+  ('lesson-n8n-pretest', 'course-n8n-automation', 'mod-n8n-001', 'Pre-Test N8N', 'pretest-n8n', 'quiz',
+   '<!DOCTYPE html>
+<!--
+  TEMPLATE QUIZ — Grow With AI  (pretest / post-test)
+  Mengikuti panduan-quiz.md: 10 soal pilihan ganda, Notion style, scoring x10, passing 70, level system.
+  Contoh isi: kuis N8N (bisa langsung dipakai jadi pretest/post-test kelas N8N, atau ganti array QUESTIONS).
+
+  CARA PAKAI:
+   1. Ubah QUIZ_TITLE dan QUIZ_SUBTITLE.
+   2. Ganti isi array QUESTIONS (komposisi panduan: 3 konsep, 4 studi kasus, 2 implementasi, 1 best practice).
+      - correctAnswer = index opsi benar (0=A, 1=B, 2=C, 3=D).
+   3. Simpan, lalu jadikan SQL lewat: node html-to-lesson-sql.mjs (lihat README.md). Set --type quiz.
+   4. Konten ini WAJIB masuk kolom `content_embed`.
+
+  INTEGRASI PLATFORM:
+   - Saat submit, kuis memanggil window.submitQuizScore(score, 100) -> platform auto-mark lesson selesai.
+     (platform menandai "lulus" di >=60%; result card di dalam kuis ini memakai passing 70 sesuai panduan.)
+   - Setelah render hasil, kuis men-dispatch event "load" agar iframe menyesuaikan tinggi (height re-report).
+   - Pakai optional chaining (?.) jadi file ini tetap bisa dibuka langsung di browser untuk dites.
+-->
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz</title>
+<style>
+:root{
+  --gwai-bg:#FFFFFF;
+  --gwai-text:#111827;
+  --gwai-text-secondary:#6B7280;
+  --gwai-border:#E5E7EB;
+  --gwai-primary:#111827;
+  --gwai-success:#10B981;
+  --gwai-danger:#EF4444;
+  --gwai-warning:#F97316;
+  --gwai-radius:16px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,''Segoe UI'',sans-serif;
+  background:var(--gwai-bg);color:#374151;line-height:1.7;padding:24px 16px;
+}
+.quiz-container{max-width:800px;margin:auto;}
+.quiz-header{margin-bottom:28px;}
+.quiz-header h1{font-size:32px;font-weight:700;color:var(--gwai-text);margin-bottom:8px;}
+.quiz-header p{font-size:18px;color:var(--gwai-text-secondary);}
+.progress-note{font-size:14px;color:var(--gwai-text-secondary);margin-top:6px;}
+.question-card{background:#fff;border:1px solid var(--gwai-border);border-radius:var(--gwai-radius);padding:24px;margin-bottom:20px;}
+.question-title{font-size:17px;font-weight:600;color:var(--gwai-text);margin-bottom:16px;}
+.option{display:flex;gap:10px;align-items:flex-start;padding:14px;border:1px solid var(--gwai-border);border-radius:12px;margin-bottom:10px;cursor:pointer;transition:.15s;}
+.option:hover{background:#F9FAFB;border-color:#D1D5DB;}
+.option input{margin-top:3px;width:18px;height:18px;accent-color:#6366F1;flex-shrink:0;}
+.option.selected{background:#EEF2FF;border-color:#6366F1;}
+.option.correct{background:#ECFDF5;border-color:var(--gwai-success);}
+.option.wrong{background:#FEF2F2;border-color:var(--gwai-danger);}
+.option.locked{cursor:default;}
+.feedback{display:none;margin-top:14px;padding:16px;border-radius:12px;font-size:14.5px;}
+.feedback.show{display:block;}
+.feedback.correct{background:#ECFDF5;border:1px solid var(--gwai-success);color:#065F46;}
+.feedback.wrong{background:#FEF2F2;border:1px solid var(--gwai-danger);color:#991B1B;}
+.feedback.unanswered{background:#FFF7ED;border:1px solid var(--gwai-warning);color:#9A3412;}
+.feedback strong{display:block;margin-bottom:6px;}
+.submit-btn{width:100%;padding:16px;background:var(--gwai-primary);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;}
+.submit-btn:hover{background:#000;}
+.submit-btn:disabled{background:#9CA3AF;cursor:default;}
+.result-card{display:none;margin-top:28px;padding:28px;border-radius:var(--gwai-radius);border:1px solid var(--gwai-border);background:#F9FAFB;text-align:center;}
+.result-card.show{display:block;}
+.result-score{font-size:48px;font-weight:700;color:var(--gwai-text);line-height:1;}
+.result-level{display:inline-block;margin:12px 0;padding:6px 16px;border-radius:999px;font-weight:600;font-size:14px;}
+.result-level.pass{background:#ECFDF5;color:#065F46;}
+.result-level.fail{background:#FFF7ED;color:#9A3412;}
+.result-message{color:var(--gwai-text-secondary);font-size:16px;max-width:520px;margin:0 auto;}
+@media(max-width:768px){.quiz-header h1{font-size:26px;}body{padding:16px 14px;}}
+</style>
+</head>
+<body>
+<div class="quiz-container">
+  <div class="quiz-header">
+    <h1 id="quiz-title">Quiz</h1>
+    <p id="quiz-subtitle">Jawab seluruh pertanyaan berikut.</p>
+    <p class="progress-note">10 soal &middot; Pilihan ganda &middot; Nilai lulus 70</p>
+  </div>
+
+  <form id="quiz-form">
+    <div id="questions"></div>
+    <button class="submit-btn" type="submit" id="submit-btn">Submit Quiz</button>
+  </form>
+
+  <div class="result-card" id="result-card">
+    <div class="result-score" id="result-score">0</div>
+    <div class="result-level" id="result-level">Level</div>
+    <p class="result-message" id="result-message"></p>
+  </div>
+</div>
+
+<script>
+// ====== EDIT DI SINI ======================================================
+var QUIZ_TITLE = "Quiz N8N Automation";
+var QUIZ_SUBTITLE = "Uji pemahamanmu tentang dasar-dasar automation dengan N8N.";
+
+var QUESTIONS = [
+  // --- Konsep (3) ---
+  {
+    question: "Apa fungsi utama N8N?",
+    options: ["Membuat website statis", "Mengotomatisasi alur kerja antar aplikasi", "Mengganti database", "Mendesain logo"],
+    correctAnswer: 1,
+    explanationCorrect: "N8N adalah tools automation untuk menghubungkan dan mengotomatisasi alur kerja antar aplikasi.",
+    explanationWrong: "N8N bukan website builder atau desain. Inti N8N adalah mengotomatisasi alur kerja antar aplikasi."
+  },
+  {
+    question: "Dalam N8N, yang disebut node adalah?",
+    options: ["Jenis database", "Satu langkah atau aksi di dalam workflow", "Nama paket harga", "Bahasa pemrograman"],
+    correctAnswer: 1,
+    explanationCorrect: "Node adalah satu langkah atau aksi (misalnya kirim email, baca spreadsheet) dalam sebuah workflow.",
+    explanationWrong: "Node bukan database atau paket harga. Node = satu langkah/aksi dalam workflow."
+  },
+  {
+    question: "Apa itu trigger di N8N?",
+    options: ["Node yang memulai workflow", "Tombol untuk menghapus workflow", "Jenis pesan error", "Fitur berbayar khusus"],
+    correctAnswer: 0,
+    explanationCorrect: "Trigger adalah node awal yang memicu workflow berjalan, misalnya webhook, jadwal, atau event aplikasi.",
+    explanationWrong: "Trigger bukan tombol hapus atau error. Trigger adalah node yang memulai jalannya workflow."
+  },
+  // --- Studi Kasus (4) ---
+  {
+    question: "Rina ingin setiap email masuk berlabel Invoice otomatis tersimpan ke Google Sheets. Pendekatan N8N yang tepat?",
+    options: ["Trigger Gmail (email masuk) lalu filter label lalu node Google Sheets", "Membuat spreadsheet manual tiap hari", "Hanya memakai node Telegram", "Hal ini tidak bisa dilakukan di N8N"],
+    correctAnswer: 0,
+    explanationCorrect: "Mulai dari trigger Gmail, saring berdasarkan label Invoice, lalu simpan ke Google Sheets secara otomatis.",
+    explanationWrong: "Cara manual atau node yang tidak relevan tidak menyelesaikan masalah. Pakai trigger Gmail lalu Google Sheets."
+  },
+  {
+    question: "Toko online ingin mengirim notifikasi WhatsApp tiap ada order baru yang dikirim lewat webhook. Susunan workflow yang tepat?",
+    options: ["Webhook trigger lalu node WhatsApp kirim pesan", "Schedule tiap jam tanpa data order", "Node email marketing massal", "Menghapus order lama"],
+    correctAnswer: 0,
+    explanationCorrect: "Webhook menerima data order baru, lalu node WhatsApp mengirim notifikasi otomatis berisi detail order.",
+    explanationWrong: "Schedule kosong atau email massal tidak menjawab kebutuhan notifikasi real-time per order. Pakai webhook lalu WhatsApp."
+  },
+  {
+    question: "Tim CS mau auto-balas pertanyaan umum pakai AI, lalu meneruskan ke manusia bila AI ragu. Mana yang paling tepat?",
+    options: ["Trigger pesan lalu node AI lalu IF (cek keyakinan) lalu balas atau teruskan ke agen", "Membalas semua dengan template yang sama", "Mematikan automation", "Mengirim semua pesan ke spam"],
+    correctAnswer: 0,
+    explanationCorrect: "Gabungkan AI untuk menjawab dengan node IF sebagai gerbang: jika ragu, eskalasi ke manusia. Human-in-the-loop.",
+    explanationWrong: "Template seragam atau mematikan automation menghilangkan manfaatnya. Pakai AI plus IF untuk eskalasi."
+  },
+  {
+    question: "Sebuah workflow gagal di satu node dan menghentikan seluruh proses. Praktik yang tepat agar lebih tahan gagal?",
+    options: ["Mengabaikannya", "Memakai error handling atau error workflow dan retry", "Menghapus semua node", "Menjalankan manual selamanya"],
+    correctAnswer: 1,
+    explanationCorrect: "Pakai pengaturan error (continue on fail, retry) atau error workflow agar kegagalan satu node tertangani rapi.",
+    explanationWrong: "Mengabaikan atau menghapus node tidak menyelesaikan akar masalah. Terapkan error handling dan retry."
+  },
+  // --- Implementasi (2) ---
+  {
+    question: "Untuk menjalankan workflow setiap hari pukul 8 pagi, node yang dipakai adalah?",
+    options: ["Webhook", "Schedule Trigger", "HTTP Request", "Set"],
+    correctAnswer: 1,
+    explanationCorrect: "Schedule Trigger menjalankan workflow pada jadwal tertentu, misalnya tiap hari pukul 8 pagi.",
+    explanationWrong: "Webhook menunggu panggilan eksternal, HTTP Request dan Set bukan pemicu jadwal. Pakai Schedule Trigger."
+  },
+  {
+    question: "Mengambil nilai field email dari data node sebelumnya memakai ekspresi N8N. Mana yang paling tepat?",
+    options: ["Menyalin manual tiap kali", "Ekspresi seperti {{ $json.email }}", "Tidak mungkin dilakukan", "Memakai screenshot"],
+    correctAnswer: 1,
+    explanationCorrect: "Ekspresi N8N seperti {{ $json.email }} mengambil data dinamis dari node sebelumnya secara otomatis.",
+    explanationWrong: "Menyalin manual atau screenshot tidak skalabel. Pakai ekspresi {{ $json.email }} untuk data dinamis."
+  },
+  // --- Best Practice (1) ---
+  {
+    question: "Praktik terbaik saat membangun automation N8N untuk bisnis?",
+    options: ["Menguji workflow dengan data sampel sebelum produksi, memberi nama node yang jelas, dan memantau eksekusi", "Langsung memakai data produksi tanpa pengujian", "Memakai satu workflow raksasa tanpa dokumentasi", "Tidak pernah memeriksa log"],
+    correctAnswer: 0,
+    explanationCorrect: "Uji dengan data sampel, beri nama node yang jelas, dan pantau log eksekusi agar automation andal dan mudah dirawat.",
+    explanationWrong: "Langsung ke produksi tanpa tes atau tanpa dokumentasi berisiko tinggi. Uji dulu, beri nama jelas, pantau log."
+  }
+];
+// ====== AKHIR EDIT ========================================================
+
+var PASSING = 70;
+var LETTERS = ["A", "B", "C", "D"];
+
+function levelOf(score){
+  if (score >= 90) return { name: "Expert", msg: "Luar biasa. Kamu sudah memahami materi secara mendalam dan siap menerapkannya." };
+  if (score >= 80) return { name: "Advanced", msg: "Bagus. Kamu sudah memahami sebagian besar materi." };
+  if (score >= 70) return { name: "Competent", msg: "Pemahamanmu sudah cukup baik dan siap digunakan dalam praktik." };
+  if (score >= 60) return { name: "Beginner", msg: "Kamu memahami dasar-dasar materi tetapi perlu penguatan." };
+  return { name: "Needs Improvement", msg: "Disarankan mengulang materi sebelum melanjutkan." };
+}
+
+document.getElementById("quiz-title").textContent = QUIZ_TITLE;
+document.getElementById("quiz-subtitle").textContent = QUIZ_SUBTITLE;
+
+var container = document.getElementById("questions");
+QUESTIONS.forEach(function(q, i){
+  var card = document.createElement("div");
+  card.className = "question-card";
+  card.setAttribute("data-q", i);
+
+  var title = document.createElement("h3");
+  title.className = "question-title";
+  title.textContent = (i + 1) + ". " + q.question;
+  card.appendChild(title);
+
+  q.options.forEach(function(opt, j){
+    var label = document.createElement("label");
+    label.className = "option";
+    label.setAttribute("data-opt", j);
+    var input = document.createElement("input");
+    input.type = "radio";
+    input.name = "q" + i;
+    input.value = j;
+    input.addEventListener("change", function(){
+      Array.prototype.forEach.call(card.querySelectorAll(".option"), function(o){ o.classList.remove("selected"); });
+      label.classList.add("selected");
+    });
+    label.appendChild(input);
+    label.appendChild(document.createTextNode(LETTERS[j] + ". " + opt));
+    card.appendChild(label);
+  });
+
+  var fb = document.createElement("div");
+  fb.className = "feedback";
+  card.appendChild(fb);
+
+  container.appendChild(card);
+});
+
+document.getElementById("quiz-form").addEventListener("submit", function(e){
+  e.preventDefault();
+  var correctCount = 0;
+
+  QUESTIONS.forEach(function(q, i){
+    var card = container.querySelector(''[data-q="'' + i + ''"]'');
+    var chosen = card.querySelector(''input[name="q'' + i + ''"]:checked'');
+    var chosenIdx = chosen ? parseInt(chosen.value, 10) : -1;
+    var options = card.querySelectorAll(".option");
+
+    Array.prototype.forEach.call(options, function(o){
+      o.classList.add("locked");
+      var inp = o.querySelector("input");
+      if (inp) inp.disabled = true;
+      var idx = parseInt(o.getAttribute("data-opt"), 10);
+      o.classList.remove("selected");
+      if (idx === q.correctAnswer) o.classList.add("correct");
+      else if (idx === chosenIdx) o.classList.add("wrong");
+    });
+
+    var fb = card.querySelector(".feedback");
+    fb.classList.add("show");
+    if (chosenIdx === -1){
+      fb.classList.add("unanswered");
+      fb.innerHTML = "<strong>Belum dijawab</strong>Jawaban yang benar: " + LETTERS[q.correctAnswer] + ". " + q.options[q.correctAnswer] + "<br>" + q.explanationWrong;
+    } else if (chosenIdx === q.correctAnswer){
+      correctCount++;
+      fb.classList.add("correct");
+      fb.innerHTML = "<strong>Jawaban Benar</strong>" + q.explanationCorrect;
+    } else {
+      fb.classList.add("wrong");
+      fb.innerHTML = "<strong>Jawaban Kurang Tepat</strong>Jawaban yang benar: " + LETTERS[q.correctAnswer] + ". " + q.options[q.correctAnswer] + "<br>" + q.explanationWrong;
+    }
+  });
+
+  var score = correctCount * 10;        // 0..100
+  var lvl = levelOf(score);
+  var passed = score >= PASSING;
+
+  document.getElementById("result-score").textContent = score;
+  var levelEl = document.getElementById("result-level");
+  levelEl.textContent = "Level: " + lvl.name + (passed ? " (Lulus)" : " (Belum Lulus)");
+  levelEl.className = "result-level " + (passed ? "pass" : "fail");
+  document.getElementById("result-message").textContent = "Skor " + score + " dari 100. " + lvl.msg;
+  document.getElementById("result-card").classList.add("show");
+
+  var btn = document.getElementById("submit-btn");
+  btn.disabled = true;
+  btn.textContent = "Quiz Selesai";
+
+  // Lapor skor ke platform (auto-mark selesai). Aman untuk dites standalone berkat ?.
+  if (typeof window.submitQuizScore === "function") window.submitQuizScore(score, 100);
+
+  // Konten bertambah tinggi -> minta iframe re-measure tinggi via mekanisme load bawaan platform.
+  setTimeout(function(){
+    try { window.dispatchEvent(new Event("load")); } catch (err) {}
+    document.getElementById("result-card").scrollIntoView({ behavior: "smooth", block: "center" });
+  }, 60);
+});
+</script>
+</body>
+</html>
+',
+   'html', 'Tes pemahaman awal sebelum mulai belajar N8N.', 1, 0, 'published', '2026-06-14T00:00:00.000Z', '2026-06-14T00:00:00.000Z');
+
+-- Lesson "Post-Test N8N" (quiz) untuk course course-n8n-automation
+INSERT OR IGNORE INTO lessons
+  (id, course_id, module_id, title, slug, lesson_type, content_embed, content_format, description, is_preview, sort_order, status, created_at, updated_at)
+VALUES
+  ('lesson-n8n-posttest', 'course-n8n-automation', 'mod-n8n-001', 'Post-Test N8N', 'post-test-n8n', 'quiz',
+   '<!DOCTYPE html>
+<!--
+  TEMPLATE QUIZ — Grow With AI  (pretest / post-test)
+  Mengikuti panduan-quiz.md: 10 soal pilihan ganda, Notion style, scoring x10, passing 70, level system.
+  Contoh isi: kuis N8N (bisa langsung dipakai jadi pretest/post-test kelas N8N, atau ganti array QUESTIONS).
+
+  CARA PAKAI:
+   1. Ubah QUIZ_TITLE dan QUIZ_SUBTITLE.
+   2. Ganti isi array QUESTIONS (komposisi panduan: 3 konsep, 4 studi kasus, 2 implementasi, 1 best practice).
+      - correctAnswer = index opsi benar (0=A, 1=B, 2=C, 3=D).
+   3. Simpan, lalu jadikan SQL lewat: node html-to-lesson-sql.mjs (lihat README.md). Set --type quiz.
+   4. Konten ini WAJIB masuk kolom `content_embed`.
+
+  INTEGRASI PLATFORM:
+   - Saat submit, kuis memanggil window.submitQuizScore(score, 100) -> platform auto-mark lesson selesai.
+     (platform menandai "lulus" di >=60%; result card di dalam kuis ini memakai passing 70 sesuai panduan.)
+   - Setelah render hasil, kuis men-dispatch event "load" agar iframe menyesuaikan tinggi (height re-report).
+   - Pakai optional chaining (?.) jadi file ini tetap bisa dibuka langsung di browser untuk dites.
+-->
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz</title>
+<style>
+:root{
+  --gwai-bg:#FFFFFF;
+  --gwai-text:#111827;
+  --gwai-text-secondary:#6B7280;
+  --gwai-border:#E5E7EB;
+  --gwai-primary:#111827;
+  --gwai-success:#10B981;
+  --gwai-danger:#EF4444;
+  --gwai-warning:#F97316;
+  --gwai-radius:16px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,''Segoe UI'',sans-serif;
+  background:var(--gwai-bg);color:#374151;line-height:1.7;padding:24px 16px;
+}
+.quiz-container{max-width:800px;margin:auto;}
+.quiz-header{margin-bottom:28px;}
+.quiz-header h1{font-size:32px;font-weight:700;color:var(--gwai-text);margin-bottom:8px;}
+.quiz-header p{font-size:18px;color:var(--gwai-text-secondary);}
+.progress-note{font-size:14px;color:var(--gwai-text-secondary);margin-top:6px;}
+.question-card{background:#fff;border:1px solid var(--gwai-border);border-radius:var(--gwai-radius);padding:24px;margin-bottom:20px;}
+.question-title{font-size:17px;font-weight:600;color:var(--gwai-text);margin-bottom:16px;}
+.option{display:flex;gap:10px;align-items:flex-start;padding:14px;border:1px solid var(--gwai-border);border-radius:12px;margin-bottom:10px;cursor:pointer;transition:.15s;}
+.option:hover{background:#F9FAFB;border-color:#D1D5DB;}
+.option input{margin-top:3px;width:18px;height:18px;accent-color:#6366F1;flex-shrink:0;}
+.option.selected{background:#EEF2FF;border-color:#6366F1;}
+.option.correct{background:#ECFDF5;border-color:var(--gwai-success);}
+.option.wrong{background:#FEF2F2;border-color:var(--gwai-danger);}
+.option.locked{cursor:default;}
+.feedback{display:none;margin-top:14px;padding:16px;border-radius:12px;font-size:14.5px;}
+.feedback.show{display:block;}
+.feedback.correct{background:#ECFDF5;border:1px solid var(--gwai-success);color:#065F46;}
+.feedback.wrong{background:#FEF2F2;border:1px solid var(--gwai-danger);color:#991B1B;}
+.feedback.unanswered{background:#FFF7ED;border:1px solid var(--gwai-warning);color:#9A3412;}
+.feedback strong{display:block;margin-bottom:6px;}
+.submit-btn{width:100%;padding:16px;background:var(--gwai-primary);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;}
+.submit-btn:hover{background:#000;}
+.submit-btn:disabled{background:#9CA3AF;cursor:default;}
+.result-card{display:none;margin-top:28px;padding:28px;border-radius:var(--gwai-radius);border:1px solid var(--gwai-border);background:#F9FAFB;text-align:center;}
+.result-card.show{display:block;}
+.result-score{font-size:48px;font-weight:700;color:var(--gwai-text);line-height:1;}
+.result-level{display:inline-block;margin:12px 0;padding:6px 16px;border-radius:999px;font-weight:600;font-size:14px;}
+.result-level.pass{background:#ECFDF5;color:#065F46;}
+.result-level.fail{background:#FFF7ED;color:#9A3412;}
+.result-message{color:var(--gwai-text-secondary);font-size:16px;max-width:520px;margin:0 auto;}
+@media(max-width:768px){.quiz-header h1{font-size:26px;}body{padding:16px 14px;}}
+</style>
+</head>
+<body>
+<div class="quiz-container">
+  <div class="quiz-header">
+    <h1 id="quiz-title">Quiz</h1>
+    <p id="quiz-subtitle">Jawab seluruh pertanyaan berikut.</p>
+    <p class="progress-note">10 soal &middot; Pilihan ganda &middot; Nilai lulus 70</p>
+  </div>
+
+  <form id="quiz-form">
+    <div id="questions"></div>
+    <button class="submit-btn" type="submit" id="submit-btn">Submit Quiz</button>
+  </form>
+
+  <div class="result-card" id="result-card">
+    <div class="result-score" id="result-score">0</div>
+    <div class="result-level" id="result-level">Level</div>
+    <p class="result-message" id="result-message"></p>
+  </div>
+</div>
+
+<script>
+// ====== EDIT DI SINI ======================================================
+var QUIZ_TITLE = "Quiz N8N Automation";
+var QUIZ_SUBTITLE = "Uji pemahamanmu tentang dasar-dasar automation dengan N8N.";
+
+var QUESTIONS = [
+  // --- Konsep (3) ---
+  {
+    question: "Apa fungsi utama N8N?",
+    options: ["Membuat website statis", "Mengotomatisasi alur kerja antar aplikasi", "Mengganti database", "Mendesain logo"],
+    correctAnswer: 1,
+    explanationCorrect: "N8N adalah tools automation untuk menghubungkan dan mengotomatisasi alur kerja antar aplikasi.",
+    explanationWrong: "N8N bukan website builder atau desain. Inti N8N adalah mengotomatisasi alur kerja antar aplikasi."
+  },
+  {
+    question: "Dalam N8N, yang disebut node adalah?",
+    options: ["Jenis database", "Satu langkah atau aksi di dalam workflow", "Nama paket harga", "Bahasa pemrograman"],
+    correctAnswer: 1,
+    explanationCorrect: "Node adalah satu langkah atau aksi (misalnya kirim email, baca spreadsheet) dalam sebuah workflow.",
+    explanationWrong: "Node bukan database atau paket harga. Node = satu langkah/aksi dalam workflow."
+  },
+  {
+    question: "Apa itu trigger di N8N?",
+    options: ["Node yang memulai workflow", "Tombol untuk menghapus workflow", "Jenis pesan error", "Fitur berbayar khusus"],
+    correctAnswer: 0,
+    explanationCorrect: "Trigger adalah node awal yang memicu workflow berjalan, misalnya webhook, jadwal, atau event aplikasi.",
+    explanationWrong: "Trigger bukan tombol hapus atau error. Trigger adalah node yang memulai jalannya workflow."
+  },
+  // --- Studi Kasus (4) ---
+  {
+    question: "Rina ingin setiap email masuk berlabel Invoice otomatis tersimpan ke Google Sheets. Pendekatan N8N yang tepat?",
+    options: ["Trigger Gmail (email masuk) lalu filter label lalu node Google Sheets", "Membuat spreadsheet manual tiap hari", "Hanya memakai node Telegram", "Hal ini tidak bisa dilakukan di N8N"],
+    correctAnswer: 0,
+    explanationCorrect: "Mulai dari trigger Gmail, saring berdasarkan label Invoice, lalu simpan ke Google Sheets secara otomatis.",
+    explanationWrong: "Cara manual atau node yang tidak relevan tidak menyelesaikan masalah. Pakai trigger Gmail lalu Google Sheets."
+  },
+  {
+    question: "Toko online ingin mengirim notifikasi WhatsApp tiap ada order baru yang dikirim lewat webhook. Susunan workflow yang tepat?",
+    options: ["Webhook trigger lalu node WhatsApp kirim pesan", "Schedule tiap jam tanpa data order", "Node email marketing massal", "Menghapus order lama"],
+    correctAnswer: 0,
+    explanationCorrect: "Webhook menerima data order baru, lalu node WhatsApp mengirim notifikasi otomatis berisi detail order.",
+    explanationWrong: "Schedule kosong atau email massal tidak menjawab kebutuhan notifikasi real-time per order. Pakai webhook lalu WhatsApp."
+  },
+  {
+    question: "Tim CS mau auto-balas pertanyaan umum pakai AI, lalu meneruskan ke manusia bila AI ragu. Mana yang paling tepat?",
+    options: ["Trigger pesan lalu node AI lalu IF (cek keyakinan) lalu balas atau teruskan ke agen", "Membalas semua dengan template yang sama", "Mematikan automation", "Mengirim semua pesan ke spam"],
+    correctAnswer: 0,
+    explanationCorrect: "Gabungkan AI untuk menjawab dengan node IF sebagai gerbang: jika ragu, eskalasi ke manusia. Human-in-the-loop.",
+    explanationWrong: "Template seragam atau mematikan automation menghilangkan manfaatnya. Pakai AI plus IF untuk eskalasi."
+  },
+  {
+    question: "Sebuah workflow gagal di satu node dan menghentikan seluruh proses. Praktik yang tepat agar lebih tahan gagal?",
+    options: ["Mengabaikannya", "Memakai error handling atau error workflow dan retry", "Menghapus semua node", "Menjalankan manual selamanya"],
+    correctAnswer: 1,
+    explanationCorrect: "Pakai pengaturan error (continue on fail, retry) atau error workflow agar kegagalan satu node tertangani rapi.",
+    explanationWrong: "Mengabaikan atau menghapus node tidak menyelesaikan akar masalah. Terapkan error handling dan retry."
+  },
+  // --- Implementasi (2) ---
+  {
+    question: "Untuk menjalankan workflow setiap hari pukul 8 pagi, node yang dipakai adalah?",
+    options: ["Webhook", "Schedule Trigger", "HTTP Request", "Set"],
+    correctAnswer: 1,
+    explanationCorrect: "Schedule Trigger menjalankan workflow pada jadwal tertentu, misalnya tiap hari pukul 8 pagi.",
+    explanationWrong: "Webhook menunggu panggilan eksternal, HTTP Request dan Set bukan pemicu jadwal. Pakai Schedule Trigger."
+  },
+  {
+    question: "Mengambil nilai field email dari data node sebelumnya memakai ekspresi N8N. Mana yang paling tepat?",
+    options: ["Menyalin manual tiap kali", "Ekspresi seperti {{ $json.email }}", "Tidak mungkin dilakukan", "Memakai screenshot"],
+    correctAnswer: 1,
+    explanationCorrect: "Ekspresi N8N seperti {{ $json.email }} mengambil data dinamis dari node sebelumnya secara otomatis.",
+    explanationWrong: "Menyalin manual atau screenshot tidak skalabel. Pakai ekspresi {{ $json.email }} untuk data dinamis."
+  },
+  // --- Best Practice (1) ---
+  {
+    question: "Praktik terbaik saat membangun automation N8N untuk bisnis?",
+    options: ["Menguji workflow dengan data sampel sebelum produksi, memberi nama node yang jelas, dan memantau eksekusi", "Langsung memakai data produksi tanpa pengujian", "Memakai satu workflow raksasa tanpa dokumentasi", "Tidak pernah memeriksa log"],
+    correctAnswer: 0,
+    explanationCorrect: "Uji dengan data sampel, beri nama node yang jelas, dan pantau log eksekusi agar automation andal dan mudah dirawat.",
+    explanationWrong: "Langsung ke produksi tanpa tes atau tanpa dokumentasi berisiko tinggi. Uji dulu, beri nama jelas, pantau log."
+  }
+];
+// ====== AKHIR EDIT ========================================================
+
+var PASSING = 70;
+var LETTERS = ["A", "B", "C", "D"];
+
+function levelOf(score){
+  if (score >= 90) return { name: "Expert", msg: "Luar biasa. Kamu sudah memahami materi secara mendalam dan siap menerapkannya." };
+  if (score >= 80) return { name: "Advanced", msg: "Bagus. Kamu sudah memahami sebagian besar materi." };
+  if (score >= 70) return { name: "Competent", msg: "Pemahamanmu sudah cukup baik dan siap digunakan dalam praktik." };
+  if (score >= 60) return { name: "Beginner", msg: "Kamu memahami dasar-dasar materi tetapi perlu penguatan." };
+  return { name: "Needs Improvement", msg: "Disarankan mengulang materi sebelum melanjutkan." };
+}
+
+document.getElementById("quiz-title").textContent = QUIZ_TITLE;
+document.getElementById("quiz-subtitle").textContent = QUIZ_SUBTITLE;
+
+var container = document.getElementById("questions");
+QUESTIONS.forEach(function(q, i){
+  var card = document.createElement("div");
+  card.className = "question-card";
+  card.setAttribute("data-q", i);
+
+  var title = document.createElement("h3");
+  title.className = "question-title";
+  title.textContent = (i + 1) + ". " + q.question;
+  card.appendChild(title);
+
+  q.options.forEach(function(opt, j){
+    var label = document.createElement("label");
+    label.className = "option";
+    label.setAttribute("data-opt", j);
+    var input = document.createElement("input");
+    input.type = "radio";
+    input.name = "q" + i;
+    input.value = j;
+    input.addEventListener("change", function(){
+      Array.prototype.forEach.call(card.querySelectorAll(".option"), function(o){ o.classList.remove("selected"); });
+      label.classList.add("selected");
+    });
+    label.appendChild(input);
+    label.appendChild(document.createTextNode(LETTERS[j] + ". " + opt));
+    card.appendChild(label);
+  });
+
+  var fb = document.createElement("div");
+  fb.className = "feedback";
+  card.appendChild(fb);
+
+  container.appendChild(card);
+});
+
+document.getElementById("quiz-form").addEventListener("submit", function(e){
+  e.preventDefault();
+  var correctCount = 0;
+
+  QUESTIONS.forEach(function(q, i){
+    var card = container.querySelector(''[data-q="'' + i + ''"]'');
+    var chosen = card.querySelector(''input[name="q'' + i + ''"]:checked'');
+    var chosenIdx = chosen ? parseInt(chosen.value, 10) : -1;
+    var options = card.querySelectorAll(".option");
+
+    Array.prototype.forEach.call(options, function(o){
+      o.classList.add("locked");
+      var inp = o.querySelector("input");
+      if (inp) inp.disabled = true;
+      var idx = parseInt(o.getAttribute("data-opt"), 10);
+      o.classList.remove("selected");
+      if (idx === q.correctAnswer) o.classList.add("correct");
+      else if (idx === chosenIdx) o.classList.add("wrong");
+    });
+
+    var fb = card.querySelector(".feedback");
+    fb.classList.add("show");
+    if (chosenIdx === -1){
+      fb.classList.add("unanswered");
+      fb.innerHTML = "<strong>Belum dijawab</strong>Jawaban yang benar: " + LETTERS[q.correctAnswer] + ". " + q.options[q.correctAnswer] + "<br>" + q.explanationWrong;
+    } else if (chosenIdx === q.correctAnswer){
+      correctCount++;
+      fb.classList.add("correct");
+      fb.innerHTML = "<strong>Jawaban Benar</strong>" + q.explanationCorrect;
+    } else {
+      fb.classList.add("wrong");
+      fb.innerHTML = "<strong>Jawaban Kurang Tepat</strong>Jawaban yang benar: " + LETTERS[q.correctAnswer] + ". " + q.options[q.correctAnswer] + "<br>" + q.explanationWrong;
+    }
+  });
+
+  var score = correctCount * 10;        // 0..100
+  var lvl = levelOf(score);
+  var passed = score >= PASSING;
+
+  document.getElementById("result-score").textContent = score;
+  var levelEl = document.getElementById("result-level");
+  levelEl.textContent = "Level: " + lvl.name + (passed ? " (Lulus)" : " (Belum Lulus)");
+  levelEl.className = "result-level " + (passed ? "pass" : "fail");
+  document.getElementById("result-message").textContent = "Skor " + score + " dari 100. " + lvl.msg;
+  document.getElementById("result-card").classList.add("show");
+
+  var btn = document.getElementById("submit-btn");
+  btn.disabled = true;
+  btn.textContent = "Quiz Selesai";
+
+  // Lapor skor ke platform (auto-mark selesai). Aman untuk dites standalone berkat ?.
+  if (typeof window.submitQuizScore === "function") window.submitQuizScore(score, 100);
+
+  // Konten bertambah tinggi -> minta iframe re-measure tinggi via mekanisme load bawaan platform.
+  setTimeout(function(){
+    try { window.dispatchEvent(new Event("load")); } catch (err) {}
+    document.getElementById("result-card").scrollIntoView({ behavior: "smooth", block: "center" });
+  }, 60);
+});
+</script>
+</body>
+</html>
+',
+   'html', 'Tes pemahaman setelah mempelajari dasar N8N.', 0, 4, 'published', '2026-06-14T00:00:00.000Z', '2026-06-14T00:00:00.000Z');

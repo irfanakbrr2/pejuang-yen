@@ -1,0 +1,11 @@
+-- 0061: Index pada sessions.token_hash
+-- authMiddleware() me-resolve sesi tiap request ter-autentikasi via
+--   WHERE token_hash = ? AND expires_at > ? AND revoked_at IS NULL
+-- Tanpa index ini lookup = FULL TABLE SCAN sessions + JOIN users PER REQUEST,
+-- yang biayanya tumbuh seiring tabel sessions membesar (cleanup hanya hapus
+-- revoked >30 hari). Index equality pada token_hash mengubahnya jadi seek O(log n).
+--
+-- Non-unique disengaja: menghindari risiko migrasi gagal apply bila ada data
+-- historis tak terduga. token_hash efektif unik (hash token acak); bisa
+-- di-upgrade ke UNIQUE nanti setelah verifikasi tidak ada duplikat.
+CREATE INDEX IF NOT EXISTS idx_sessions_token_hash ON sessions(token_hash);

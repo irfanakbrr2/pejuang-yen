@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "growwithai-analytics": {
+      "command": "node",
+      "args": ["/Users/irfanakbrr/Documents/Growwithai.id/growwithai-app/mcp/growwithai-analytics/dist/index.js"],
+      "env": {
+        "GROWWITHAI_API_KEY": "PASTE_API_KEY_DISINI",
+        "GROWWITHAI_ANALYTICS_BASE": "https://api.growwithai.id"
+      }
+    }
+  }
+}

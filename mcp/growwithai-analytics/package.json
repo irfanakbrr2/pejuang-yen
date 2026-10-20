@@ -1,0 +1,25 @@
+{
+  "name": "growwithai-analytics-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server untuk membaca Pejuang Yen Analytics API (read-only, Bearer API key).",
+  "type": "module",
+  "bin": {
+    "growwithai-analytics-mcp": "dist/index.js"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.8.0"
+  }
+}

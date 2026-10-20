@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<!--
+  TEMPLATE MATERI BACAAN — Grow With AI
+  Mengikuti panduan-materi.md (struktur 14 bagian + design tokens Notion-style).
+  Cara pakai:
+   1. Ganti semua teks di dalam tanda [ ... ] dengan konten kelasmu.
+   2. Tambah/kurangi <li>, baris tabel, atau <details> sesuai kebutuhan.
+   3. Simpan, lalu jadikan SQL lewat: node html-to-lesson-sql.mjs (lihat README.md).
+   4. Konten ini WAJIB masuk kolom `content_embed` (bukan content_html — sanitizer membuang <style>).
+  Catatan: ini dokumen HTML penuh; dirender apa adanya di dalam iframe srcdoc pelajaran.
+-->
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>[Judul Materi]</title>
+<style>
+:root{
+  --text:#2f3437;
+  --muted:#6b7280;
+  --border:#e5e7eb;
+  --bg:#ffffff;
+  --soft:#f7f7f5;
+  --accent:#0F6E56;
+  --accent-soft:#E8F5F0;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+  background:#fff;color:var(--text);line-height:1.8;padding:24px 16px;
+}
+.container{max-width:940px;margin:auto;}
+section{margin-bottom:56px;}
+h1{font-size:40px;line-height:1.2;margin-bottom:16px;}
+h2{font-size:28px;margin-bottom:20px;}
+h3{font-size:20px;margin-bottom:12px;}
+p{margin-bottom:16px;}
+ul,ol{margin:0 0 16px 22px;}
+li{margin-bottom:8px;}
+.tag{display:inline-block;padding:6px 12px;border-radius:999px;background:#f3f4f6;font-size:13px;margin:0 8px 8px 0;}
+.tag-accent{background:var(--accent-soft);color:var(--accent);}
+.card{border:1px solid var(--border);border-radius:18px;padding:24px;background:#fff;}
+.callout{background:var(--soft);padding:20px;border-radius:14px;}
+.quote{border-left:4px solid #d1d5db;padding-left:20px;font-style:italic;color:#4b5563;}
+table{width:100%;border-collapse:collapse;margin-bottom:8px;}
+th{background:#fafafa;font-weight:600;}
+th,td{border:1px solid var(--border);padding:12px 14px;text-align:left;vertical-align:top;}
+.grid-two{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.mindset-row{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);}
+.mindset-row .arrow{color:var(--accent);font-weight:700;}
+.muted{color:var(--muted);}
+.steps{counter-reset:step;list-style:none;margin-left:0;}
+.steps li{position:relative;padding-left:44px;margin-bottom:18px;}
+.steps li::before{counter-increment:step;content:counter(step);position:absolute;left:0;top:0;width:30px;height:30px;border-radius:999px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;}
+.check{list-style:none;margin-left:0;}
+.check li{position:relative;padding-left:30px;margin-bottom:10px;}
+.check li::before{content:"";position:absolute;left:0;top:6px;width:16px;height:16px;border:2px solid var(--accent);border-radius:5px;}
+details{border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:12px;}
+summary{cursor:pointer;font-weight:600;}
+details p{margin-top:12px;margin-bottom:0;}
+@media(max-width:768px){
+  h1{font-size:32px;} h2{font-size:24px;} body{padding:16px 14px;}
+  .grid-two{grid-template-columns:1fr;}
+  .mindset-row{grid-template-columns:1fr;text-align:left;}
+  .mindset-row .arrow{display:none;}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- 1. HEADER -->
+  <header>
+    <h1>[Judul Materi]</h1>
+    <p class="muted">[Deskripsi singkat 1-2 kalimat: materi ini membantu peserta melakukan apa.]</p>
+    <div style="margin-top:12px;">
+      <span class="tag tag-accent">[Kategori]</span>
+      <span class="tag">AI</span>
+      <span class="tag">[Level: Beginner / Intermediate / Advanced]</span>
+    </div>
+  </header>
+
+  <!-- 2. LEARNING OBJECTIVE -->
+  <section>
+    <h2>Learning Objective</h2>
+    <div class="card">
+      <p style="margin-bottom:12px;">Setelah mempelajari materi ini peserta mampu:</p>
+      <ul>
+        <li>[Memahami konsep ...]</li>
+        <li>[Menggunakan tools ...]</li>
+        <li>[Membangun workflow ...]</li>
+        <li>[Mengukur hasil implementasi ...]</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 3. MENGAPA INI PENTING -->
+  <section>
+    <h2>Mengapa Ini Penting</h2>
+    <div class="callout">
+      <p style="margin-bottom:8px;"><strong>Masalah saat ini:</strong> [Apa yang terjadi kalau dikerjakan manual.]</p>
+      <p style="margin-bottom:8px;"><strong>Risiko jika tidak berubah:</strong> [Dampak negatif.]</p>
+      <p style="margin-bottom:0;"><strong>Peluang dengan AI:</strong> [Apa yang bisa dipercepat / diperbaiki.]</p>
+    </div>
+  </section>
+
+  <!-- 4. MINDSET SHIFT (min 5) -->
+  <section>
+    <h2>Mindset Shift</h2>
+    <div class="card">
+      <div class="mindset-row"><div class="muted">[Mindset lama 1]</div><div class="arrow">&rarr;</div><div>[Mindset baru 1]</div></div>
+      <div class="mindset-row"><div class="muted">[Mindset lama 2]</div><div class="arrow">&rarr;</div><div>[Mindset baru 2]</div></div>
+      <div class="mindset-row"><div class="muted">[Mindset lama 3]</div><div class="arrow">&rarr;</div><div>[Mindset baru 3]</div></div>
+      <div class="mindset-row"><div class="muted">[Mindset lama 4]</div><div class="arrow">&rarr;</div><div>[Mindset baru 4]</div></div>
+      <div class="mindset-row" style="border-bottom:none;"><div class="muted">[Mindset lama 5]</div><div class="arrow">&rarr;</div><div>[Mindset baru 5]</div></div>
+    </div>
+  </section>
+
+  <!-- 5. KONSEP DASAR -->
+  <section>
+    <h2>Konsep Dasar</h2>
+    <p>[Jelaskan konsep inti dengan bahasa sederhana dan analogi bisnis. Hindari jargon teknis yang tidak perlu.]</p>
+    <div class="quote">[Satu kalimat prinsip utama yang ingin diingat peserta.]</div>
+  </section>
+
+  <!-- 6. FRAMEWORK -->
+  <section>
+    <h2>Framework</h2>
+    <div class="quote">[Langkah 1] &rarr; [Langkah 2] &rarr; [Langkah 3] &rarr; [Langkah 4]</div>
+    <p class="muted">[Penjelasan singkat tiap tahap framework.]</p>
+  </section>
+
+  <!-- 7. TOOLS YANG DIGUNAKAN -->
+  <section>
+    <h2>Tools Yang Digunakan</h2>
+    <table>
+      <thead>
+        <tr><th>Tools</th><th>Fungsi</th><th>Kapan Digunakan</th><th>Tingkat Kesulitan</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>[ChatGPT]</td><td>[Analisa &amp; ide]</td><td>[Harian]</td><td>[Mudah]</td></tr>
+        <tr><td>[Claude]</td><td>[Dokumen panjang]</td><td>[Research]</td><td>[Mudah]</td></tr>
+        <tr><td>[Tool lain]</td><td>[Fungsi]</td><td>[Kapan]</td><td>[Sedang]</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 8. WORKFLOW SEBELUM & SESUDAH AI -->
+  <section>
+    <h2>Workflow Sebelum dan Sesudah AI</h2>
+    <div class="grid-two">
+      <div class="card"><h3>Sebelum AI</h3><p class="muted" style="margin-bottom:0;">[Bagaimana proses berjalan manual.]</p></div>
+      <div class="card"><h3>Sesudah AI</h3><p class="muted" style="margin-bottom:0;">[Bagaimana proses baru berjalan.]</p></div>
+    </div>
+    <div class="callout" style="margin-top:16px;">
+      <strong>Dampak:</strong> Waktu [-X%] &middot; Biaya [-X%] &middot; Akurasi [+X%] &middot; Produktivitas [+X%]
+    </div>
+  </section>
+
+  <!-- 9. TUTORIAL IMPLEMENTASI -->
+  <section>
+    <h2>Tutorial Implementasi</h2>
+    <ol class="steps">
+      <li>[Step 1 — langkah praktis yang bisa langsung dikerjakan.]</li>
+      <li>[Step 2]</li>
+      <li>[Step 3]</li>
+      <li>[Step 4]</li>
+    </ol>
+  </section>
+
+  <!-- 10. STUDI KASUS -->
+  <section>
+    <h2>Studi Kasus</h2>
+    <div class="card">
+      <p><strong>Kondisi Awal:</strong> [...]</p>
+      <p><strong>Masalah:</strong> [...]</p>
+      <p><strong>Solusi:</strong> [...]</p>
+      <p><strong>Workflow:</strong> [...]</p>
+      <p><strong>Hasil:</strong> [...]</p>
+      <p style="margin-bottom:0;"><strong>Pelajaran:</strong> [...]</p>
+    </div>
+  </section>
+
+  <!-- 11. KESALAHAN UMUM (min 5) -->
+  <section>
+    <h2>Kesalahan Umum</h2>
+    <div class="callout">
+      <ul style="margin-bottom:0;">
+        <li>[Terlalu percaya AI tanpa validasi]</li>
+        <li>[Prompt terlalu pendek / tanpa konteks]</li>
+        <li>[Tidak melakukan human review]</li>
+        <li>[Tidak mengukur hasil]</li>
+        <li>[Kesalahan spesifik topik ini]</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 12. CHECKLIST IMPLEMENTASI -->
+  <section>
+    <h2>Checklist Implementasi</h2>
+    <div class="card">
+      <ul class="check" style="margin-bottom:0;">
+        <li>[Membuat akun tools]</li>
+        <li>[Menyiapkan workflow]</li>
+        <li>[Menguji prompt]</li>
+        <li>[Mengukur hasil]</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 13. RINGKASAN -->
+  <section>
+    <h2>Ringkasan</h2>
+    <div class="callout">
+      <p style="margin-bottom:8px;"><strong>Pelajaran utama:</strong> [...]</p>
+      <p style="margin-bottom:8px;"><strong>Prinsip utama:</strong> [...]</p>
+      <p style="margin-bottom:0;"><strong>Langkah berikutnya:</strong> [...]</p>
+    </div>
+  </section>
+
+  <!-- 14. FAQ (min 5, accordion) -->
+  <section>
+    <h2>FAQ</h2>
+    <details><summary>[Pertanyaan 1?]</summary><p>[Jawaban.]</p></details>
+    <details><summary>[Pertanyaan 2?]</summary><p>[Jawaban.]</p></details>
+    <details><summary>[Pertanyaan 3?]</summary><p>[Jawaban.]</p></details>
+    <details><summary>[Pertanyaan 4?]</summary><p>[Jawaban.]</p></details>
+    <details><summary>[Pertanyaan 5?]</summary><p>[Jawaban.]</p></details>
+  </section>
+
+</div>
+</body>
+</html>

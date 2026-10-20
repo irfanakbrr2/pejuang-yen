@@ -1,0 +1,29 @@
+{
+  "name": "@growwithai/api",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "wrangler deploy --dry-run",
+    "test:pakasir": "tsx src/domains/webhooks/pakasir.routes.test.mjs",
+    "test:funnels": "tsx src/domains/funnels/funnels.test.mjs",
+    "deploy": "wrangler deploy --env production",
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "wrangler d1 execute growwithai-db --local --file=./src/db/migrations/0001_initial_schema.sql",
+    "db:seed": "wrangler d1 execute growwithai-db --local --file=./src/db/migrations/0002_seed_data.sql",
+    "test:toko": "tsx src/domains/toko/toko.test.mjs",
+    "test:utm": "tsx ../../packages/shared/src/utm.test.mjs"
+  },
+  "dependencies": {
+    "@growwithai/shared": "workspace:*",
+    "@scalar/hono-api-reference": "^0.10.19",
+    "hono": "^4.7.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250501.0",
+    "tsx": "^4.22.4",
+    "typescript": "^5.8.0",
+    "wrangler": "^4.14.0"
+  }
+}

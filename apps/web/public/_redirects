@@ -1,0 +1,21 @@
+/api/* https://api.growwithai.id/api/:splat 200
+/course/:slug /course/_/ 200
+/order/:productSlug /order/_/ 200
+/checkout/success /checkout/success/ 200
+/checkout/:orderId /checkout/_/ 200
+/products/:slug /products/_/ 200
+/toko/:slug /toko/_/ 200
+/toko/:slug/:productSlug /toko/_/_/ 200
+/learn/:courseSlug/start /learn/_/start/ 200
+/learn/:courseSlug/:lessonSlug /learn/_/_/ 200
+/admin/courses/:id /admin/courses/_/ 200
+/admin/funnels/:id /admin/funnels/_/ 200
+/admin/orders/:id /admin/orders/_/ 200
+/admin/users/:id/journey /admin/users/_/journey/ 200
+/admin/users/:id /admin/users/_/ 200
+/certificates/:id /certificates/_/ 200
+/verify/:number /verify/_/ 200
+
+/skills/:slug /skills/_/ 200
+/paths/:slug /paths/_/ 200
+/admin/paths/:id /admin/paths/_/ 200

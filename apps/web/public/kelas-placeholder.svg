@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" fill="none">
+  <rect width="640" height="360" fill="#F7E8E8"/>
+  <rect x="0" y="0" width="640" height="360" fill="url(#g)"/>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="640" y2="360" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F7E8E8"/>
+      <stop offset="1" stop-color="#F0D6D6"/>
+    </linearGradient>
+  </defs>
+  <!-- window/¥ icon -->
+  <g transform="translate(238,96)" stroke="#8B0000" stroke-width="9" stroke-linejoin="round" stroke-linecap="round" fill="none">
+    <path d="M58 16 L150 0 L150 110 L58 126 Z"/>
+    <path d="M18 52 L96 38 L96 150 L18 164 Z"/>
+  </g>
+  <rect x="252" y="232" width="34" height="34" rx="4" stroke="#8B0000" stroke-width="6" fill="none"/>
+  <text x="269" y="258" font-family="Georgia, 'Times New Roman', serif" font-size="24" font-weight="700" fill="#8B0000" text-anchor="middle">¥</text>
+  <text x="320" y="318" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="600" fill="#8B0000" text-anchor="middle" letter-spacing="-0.5">PejuangYen</text>
+</svg>
